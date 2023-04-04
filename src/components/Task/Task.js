@@ -50,7 +50,9 @@ export default class Task extends Component {
         <div className="view">
           <input className="toggle" type="checkbox" onChange={onToggleCompleted} checked={completed}></input>
           <label>
-            <span className="description">{description}</span>
+            <span className="description" onClick={onToggleCompleted} aria-hidden="true">
+              {description}
+            </span>
             <span className="created">created {this.state.timer} ago</span>
           </label>
           <button className="icon icon-edit"></button>
