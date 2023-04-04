@@ -16,7 +16,7 @@ export default class Task extends Component {
     completed: PropTypes.bool,
     onDeleted: PropTypes.func,
     onToggleCompleted: PropTypes.func,
-    time: PropTypes.string,
+    created: PropTypes.string,
   }
 
   state = {
