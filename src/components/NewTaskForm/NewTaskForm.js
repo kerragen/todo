@@ -1,7 +1,11 @@
+import PropTypes from 'prop-types'
 import { Component } from 'react'
 import './NewTaskForm.css'
 
 export default class NewTaskForm extends Component {
+  static PropTypes = {
+    addTask: PropTypes.func,
+  }
   state = {
     description: '',
   }
@@ -14,10 +18,12 @@ export default class NewTaskForm extends Component {
 
   onSubmit = (e) => {
     e.preventDefault()
-    this.props.addTask(this.state.description)
-    this.setState({
-      description: '',
-    })
+    if (this.state.description.trim() !== '') {
+      this.props.addTask(this.state.description)
+      this.setState({
+        description: '',
+      })
+    }
   }
 
   render() {

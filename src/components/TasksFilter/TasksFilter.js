@@ -1,7 +1,17 @@
+import PropTypes from 'prop-types'
 import { Component } from 'react'
 import './TasksFilter.css'
 
 export default class TasksFilter extends Component {
+  static defaultProps = {
+    filter: 'all',
+    onFilterChange: () => {},
+  }
+
+  static PropTypes = {
+    filter: PropTypes.string,
+    onFilterChange: PropTypes.func,
+  }
   buttons = [
     { name: 'all', description: 'All' },
     { name: 'active', description: 'Active' },

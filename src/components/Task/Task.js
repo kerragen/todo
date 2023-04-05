@@ -40,13 +40,13 @@ export default class Task extends Component {
   render() {
     const { description, onDeleted, onToggleCompleted, completed } = this.props
 
-    let changeState = ''
+    let classNames = ''
     if (completed) {
-      changeState += 'completed'
+      classNames += 'completed'
     }
 
     return (
-      <li className={changeState}>
+      <li className={classNames}>
         <div className="view">
           <input className="toggle" type="checkbox" onChange={onToggleCompleted} checked={completed}></input>
           <label>
