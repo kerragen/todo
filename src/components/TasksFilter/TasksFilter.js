@@ -8,7 +8,7 @@ export default class TasksFilter extends Component {
     onFilterChange: () => {},
   }
 
-  static PropTypes = {
+  static propTypes = {
     filter: PropTypes.string,
     onFilterChange: PropTypes.func,
   }

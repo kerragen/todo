@@ -9,6 +9,7 @@ export default class Task extends Component {
     completed: false,
     onDeleted: () => {},
     onToggleCompleted: () => {},
+    created: '',
   }
 
   static propTypes = {

@@ -3,7 +3,7 @@ import { Component } from 'react'
 import './NewTaskForm.css'
 
 export default class NewTaskForm extends Component {
-  static PropTypes = {
+  static propTypes = {
     addTask: PropTypes.func,
   }
   state = {
@@ -15,6 +15,7 @@ export default class NewTaskForm extends Component {
       description: e.target.value,
     })
   }
+
   onSubmit = (e) => {
     e.preventDefault()
     if (this.state.description.trim() !== '') {
