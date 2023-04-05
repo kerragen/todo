@@ -15,7 +15,6 @@ export default class NewTaskForm extends Component {
       description: e.target.value,
     })
   }
-
   onSubmit = (e) => {
     e.preventDefault()
     if (this.state.description.trim() !== '') {
