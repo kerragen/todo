@@ -18,7 +18,7 @@ export default class NewTaskForm extends Component {
 
   onSubmit = (e) => {
     e.preventDefault()
-    if (this.state.description.trim() !== '') {
+    if (this.state.description.trim()) {
       this.props.addTask(this.state.description)
       this.setState({
         description: '',
@@ -34,6 +34,7 @@ export default class NewTaskForm extends Component {
           placeholder="What needs to be done?"
           value={this.state.description}
           onChange={this.onDescriptionChange}
+          required
         ></input>
       </form>
     )
