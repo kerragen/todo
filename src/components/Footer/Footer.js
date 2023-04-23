@@ -14,6 +14,7 @@ const Footer = ({ count, onClearCompleted, filter, onFilterChange }) => {
     </footer>
   )
 }
+
 Footer.defaultProps = {
   count: 0,
   onClearCompleted: () => {},

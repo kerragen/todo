@@ -13,12 +13,14 @@ export default class App extends Component {
     filter: 'all',
   }
 
-  createTask(description) {
+  createTask(title, timeLeft) {
     return {
       id: this.maxId++,
-      description,
+      title,
       completed: false,
       created: new Date(),
+      timeLeft,
+      isActive: false,
     }
   }
 
@@ -32,8 +34,9 @@ export default class App extends Component {
     })
   }
 
-  addTask = (text) => {
-    const newTask = this.createTask(text)
+  addTask = (text, min, sec) => {
+    const timeLeft = min * 60 + Number(sec)
+    const newTask = this.createTask(text, timeLeft)
 
     this.setState(({ tasks }) => {
       const newTasks = [...tasks, newTask]
@@ -46,10 +49,10 @@ export default class App extends Component {
   toggleProperty(arr, id, propName) {
     const idx = arr.findIndex((el) => el.id === id)
 
-    const oldTask = arr[idx]
-    const newTask = { ...oldTask, [propName]: !oldTask[propName] }
+    const oldItem = arr[idx]
+    const newItem = { ...oldItem, [propName]: !oldItem[propName] }
 
-    return [...arr.slice(0, idx), newTask, ...arr.slice(idx + 1)]
+    return [...arr.slice(0, idx), newItem, ...arr.slice(idx + 1)]
   }
 
   onToggleCompleted = (id) => {
@@ -86,6 +89,51 @@ export default class App extends Component {
     this.setState({ filter })
   }
 
+  timer = {}
+
+  onTimerStart = (id) => {
+    const { tasks } = this.state
+    const idx = tasks.findIndex((el) => el.id === id)
+    if (tasks[idx].isActive) {
+      return
+    }
+    this.timer[id] = setInterval(() => this.tick(id), 1000)
+  }
+
+  onTimerStop = (id) => {
+    clearInterval(this.timer[id])
+    this.setState(({ tasks }) => {
+      const idx = tasks.findIndex((el) => el.id === id)
+      const oldItem = tasks[idx]
+      const newItem = { ...oldItem, isActive: false }
+      const newArr = [...tasks.slice(0, idx), newItem, ...tasks.slice(idx + 1)]
+      return {
+        tasks: newArr,
+      }
+    })
+  }
+
+  tick(id) {
+    this.setState(({ tasks }) => {
+      const idx = tasks.findIndex((el) => el.id === id)
+      const oldItem = tasks[idx]
+      if (oldItem === undefined) {
+        clearInterval(this.timer[id])
+        return
+      }
+      if (!oldItem.timeLeft) {
+        clearInterval(this.timer[id])
+        return
+      }
+      const newItem = { ...oldItem, timeLeft: oldItem.timeLeft - 1, isActive: true }
+      const newArr = [...tasks.slice(0, idx), newItem, ...tasks.slice(idx + 1)]
+
+      return {
+        tasks: newArr,
+      }
+    })
+  }
+
   render() {
     const { tasks, filter } = this.state
     const count = tasks.filter((el) => !el.completed).length
@@ -98,7 +146,13 @@ export default class App extends Component {
           <NewTaskForm addTask={this.addTask} />
         </header>
         <section className="main">
-          <TaskList tasks={visibleItems} onDeleted={this.deleteTask} onToggleCompleted={this.onToggleCompleted} />
+          <TaskList
+            tasks={visibleItems}
+            onDeleted={this.deleteTask}
+            onToggleCompleted={this.onToggleCompleted}
+            onTimerStart={this.onTimerStart}
+            onTimerStop={this.onTimerStop}
+          />
         </section>
         <Footer
           count={count}

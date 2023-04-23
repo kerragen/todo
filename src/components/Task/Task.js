@@ -5,19 +5,25 @@ import './Task.css'
 
 export default class Task extends Component {
   static defaultProps = {
-    description: '',
+    title: '',
     completed: false,
     onDeleted: () => {},
     onToggleCompleted: () => {},
     created: '',
+    onTimerStart: () => {},
+    onTimerStop: () => {},
+    timeLeft: '',
   }
 
   static propTypes = {
-    description: PropTypes.string,
+    title: PropTypes.string,
     completed: PropTypes.bool,
     onDeleted: PropTypes.func,
     onToggleCompleted: PropTypes.func,
     created: PropTypes.string,
+    onTimerStart: PropTypes.func,
+    onTimerStop: PropTypes.func,
+    timeLeft: PropTypes.string,
   }
 
   state = {
@@ -39,7 +45,11 @@ export default class Task extends Component {
   }
 
   render() {
-    const { description, onDeleted, onToggleCompleted, completed } = this.props
+    const { title, onDeleted, onToggleCompleted, completed, onTimerStart, onTimerStop, timeLeft } = this.props
+
+    const toPad = (time) => time.toString().padStart(2, '0')
+    const min = toPad(Math.floor(timeLeft / 60))
+    const sec = toPad(timeLeft - min * 60)
 
     let classNames = ''
     if (completed) {
@@ -51,10 +61,15 @@ export default class Task extends Component {
         <div className="view">
           <input className="toggle" type="checkbox" onChange={onToggleCompleted} checked={completed}></input>
           <label>
-            <span className="description" onClick={onToggleCompleted} aria-hidden="true">
-              {description}
+            <span className="title" onClick={onToggleCompleted} aria-hidden="true">
+              {title}
             </span>
-            <span className="created">created {this.state.timer} ago</span>
+            <span className="description">
+              <button className="icon icon-play" onClick={onTimerStart}></button>
+              <button className="icon icon-pause" onClick={onTimerStop}></button>
+              <span className="description">{`${min}:${sec}`}</span>
+            </span>
+            <span className="description">created {this.state.timer} ago</span>
           </label>
           <button className="icon icon-edit"></button>
           <button className="icon icon-destroy" onClick={onDeleted}></button>
