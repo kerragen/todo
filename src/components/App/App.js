@@ -10,7 +10,6 @@ function App() {
   const [maxId, setMaxId] = useState(1)
 
   const itemsLeft = tasks.filter((el) => !el.completed).length
-
   useEffect(() => {
     setMaxId((id) => id + 1)
   }, [tasks])
