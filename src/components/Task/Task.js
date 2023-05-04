@@ -14,6 +14,7 @@ function Task({ onToggleCompleted, id, onDeleted, item }) {
       () => updateCreatedAgo(formatDistanceToNow(created, { includeSeconds: true })),
       1000
     )
+
     return () => {
       clearInterval(createdAgoID)
     }
