@@ -3,22 +3,20 @@ import PropTypes from 'prop-types'
 import Task from '../Task/Task'
 import './TaskList.css'
 
-const TaskList = ({ tasks, onDeleted, onToggleCompleted, onTimerStart, onTimerStop }) => {
-  const el = tasks.map((item) => {
-    const { id, title, completed, created, timeLeft } = item
-
+function TaskList({ todos, onToggleCompleted, updateTaskDate, onSubmitChanges, onDeleted }) {
+  const el = todos.map((item) => {
+    const { id } = item
     return (
-      <Task
-        key={id}
-        title={title}
-        completed={completed}
-        created={created}
-        onDeleted={() => onDeleted(id)}
-        onToggleCompleted={() => onToggleCompleted(id)}
-        onTimerStart={() => onTimerStart(id)}
-        onTimerStop={() => onTimerStop(id)}
-        timeLeft={timeLeft}
-      />
+      <li key={id}>
+        <Task
+          item={item}
+          id={id}
+          onToggleCompleted={() => onToggleCompleted(id)}
+          updateTaskDate={updateTaskDate}
+          onSubmitChanges={onSubmitChanges}
+          onDeleted={() => onDeleted(id)}
+        />
+      </li>
     )
   })
 
@@ -26,19 +24,11 @@ const TaskList = ({ tasks, onDeleted, onToggleCompleted, onTimerStart, onTimerSt
 }
 
 TaskList.defaultProps = {
-  tasks: [],
-  onDeleted: () => {},
-  onToggleCompleted: () => {},
-  onTimerStart: () => {},
-  onTimerStop: () => {},
+  todos: [],
 }
 
 TaskList.propTypes = {
-  tasks: PropTypes.arrayOf(PropTypes.object),
-  onDeleted: PropTypes.func,
-  onToggleCompleted: PropTypes.func,
-  onTimerStart: PropTypes.func,
-  onTimerStop: PropTypes.func,
+  todos: PropTypes.arrayOf(PropTypes.object),
 }
 
 export default TaskList

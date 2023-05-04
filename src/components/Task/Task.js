@@ -1,80 +1,64 @@
-import { Component } from 'react'
+import { useState, useEffect } from 'react'
+import formatDistanceToNow from 'date-fns/formatDistanceToNow'
 import PropTypes from 'prop-types'
-import { formatDistanceToNow } from 'date-fns'
-import './Task.css'
 
-export default class Task extends Component {
-  static defaultProps = {
-    title: '',
-    completed: false,
-    onDeleted: () => {},
-    onToggleCompleted: () => {},
-    created: '',
-    onTimerStart: () => {},
-    onTimerStop: () => {},
-    timeLeft: '',
-  }
+import Timer from '../Timer/Timer'
 
-  static propTypes = {
-    title: PropTypes.string,
-    completed: PropTypes.bool,
-    onDeleted: PropTypes.func,
-    onToggleCompleted: PropTypes.func,
-    created: PropTypes.string,
-    onTimerStart: PropTypes.func,
-    onTimerStop: PropTypes.func,
-    timeLeft: PropTypes.string,
-  }
+function Task({ onToggleCompleted, id, onDeleted, item }) {
+  const { title, timerMin, timerSec, created, completed, hide } = item
 
-  state = {
-    timer: formatDistanceToNow(this.props.created, { includeSeconds: true }),
-  }
+  const [createdAgo, updateCreatedAgo] = useState(formatDistanceToNow(created, { includeSeconds: true }))
 
-  componentDidMount() {
-    this.timerID = setInterval(() => this.tick(), 1000)
-  }
-
-  componentWillUnmount() {
-    clearInterval(this.timerID)
-  }
-
-  tick() {
-    this.setState({
-      timer: formatDistanceToNow(this.props.created, { includeSeconds: true }),
-    })
-  }
-
-  render() {
-    const { title, onDeleted, onToggleCompleted, completed, onTimerStart, onTimerStop, timeLeft } = this.props
-
-    const toPad = (time) => time.toString().padStart(2, '0')
-    const min = toPad(Math.floor(timeLeft / 60))
-    const sec = toPad(timeLeft - min * 60)
-
-    let classNames = ''
-    if (completed) {
-      classNames += 'completed'
-    }
-
-    return (
-      <li className={classNames}>
-        <div className="view">
-          <input className="toggle" type="checkbox" onChange={onToggleCompleted} checked={completed}></input>
-          <label>
-            <span className="title" onClick={onToggleCompleted} aria-hidden="true">
-              {title}
-            </span>
-            <span className="description">
-              <button className="icon icon-play" onClick={onTimerStart}></button>
-              <button className="icon icon-pause" onClick={onTimerStop}></button>
-              <span className="description">{`${min}:${sec}`}</span>
-            </span>
-            <span className="description">created {this.state.timer} ago</span>
-          </label>
-          <button className="icon icon-edit"></button>
-          <button className="icon icon-destroy" onClick={onDeleted}></button>
-        </div>
-      </li>
+  useEffect(() => {
+    const createdAgoID = setInterval(
+      () => updateCreatedAgo(formatDistanceToNow(created, { includeSeconds: true })),
+      1000
     )
-  }
+    return () => {
+      clearInterval(createdAgoID)
+    }
+  }, [created])
+
+  let classNames = ''
+  if (completed) classNames = 'completed'
+  if (hide) classNames = 'hidden'
+
+  return (
+    <li className={classNames}>
+      <div className="view">
+        <input className="toggle" type="checkbox" onChange={onToggleCompleted} checked={completed}></input>
+        <label htmlFor={id}>
+          <span className="title" onClick={onToggleCompleted} aria-hidden="true">
+            {title}
+          </span>
+          <span className="description">
+            <Timer timerMin={timerMin} timerSec={timerSec} />
+          </span>
+          <span className="description">created {createdAgo} ago</span>
+        </label>
+        <button className="icon icon-edit" type="button" aria-label="Edit"></button>
+        <button className="icon icon-destroy" type="button" aria-label="Delete" onClick={onDeleted}></button>
+      </div>
+    </li>
+  )
 }
+
+Task.defaultProps = {
+  updateInterval: 60000,
+  updateTaskDate: () => {},
+  onSubmitChanges: () => {},
+  onToggleCompleted: () => {},
+  onDeleted: () => {},
+  onEdit: () => {},
+}
+
+Task.propTypes = {
+  updateInterval: PropTypes.number,
+  updateTaskDate: PropTypes.func,
+  onSubmitChanges: PropTypes.func,
+  onToggleCompleted: PropTypes.func,
+  onDeleted: PropTypes.func,
+  onEdit: PropTypes.func,
+}
+
+export default Task

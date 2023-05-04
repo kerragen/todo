@@ -3,30 +3,36 @@ import PropTypes from 'prop-types'
 import TasksFilter from '../TasksFilter/TasksFilter'
 import './Footer.css'
 
-const Footer = ({ count, onClearCompleted, filter, onFilterChange }) => {
+function Footer({
+  itemsLeft,
+  onClearCompleted,
+  onSelectedCompletedFilter,
+  onSelectedActiveFilter,
+  onSelectedAllFilter,
+}) {
   return (
-    <footer className="footer">
-      <span className="todo-count">{count} items left</span>
-      <TasksFilter filter={filter} onFilterChange={onFilterChange} />
-      <button className="clear-completed" onClick={onClearCompleted}>
+    <div className="footer">
+      <span className="todo-count">{itemsLeft} items left</span>
+      <TasksFilter
+        onSelectedCompletedFilter={onSelectedCompletedFilter}
+        onSelectedActiveFilter={onSelectedActiveFilter}
+        onSelectedAllFilter={onSelectedAllFilter}
+      />
+      <button type="button" className="clear-completed" onClick={onClearCompleted}>
         Clear completed
       </button>
-    </footer>
+    </div>
   )
 }
 
 Footer.defaultProps = {
-  count: 0,
+  itemsLeft: 0,
   onClearCompleted: () => {},
-  filter: 'all',
-  onFilterChange: () => {},
 }
 
 Footer.propTypes = {
-  count: PropTypes.number,
+  itemsLeft: PropTypes.number,
   onClearCompleted: PropTypes.func,
-  filter: PropTypes.string,
-  onFilterChange: () => {},
 }
 
 export default Footer

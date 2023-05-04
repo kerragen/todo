@@ -1,166 +1,169 @@
-import { Component } from 'react'
+import { useState, useEffect } from 'react'
 
 import NewTaskForm from '../NewTaskForm/NewTaskForm'
 import TaskList from '../TaskList/TaskList'
 import Footer from '../Footer/Footer'
 import './App.css'
 
-export default class App extends Component {
-  maxId = 1
+function App() {
+  const [tasks, setTasks] = useState([])
+  const [maxId, setMaxId] = useState(1)
 
-  state = {
-    tasks: [],
-    filter: 'all',
+  const itemsLeft = tasks.filter((el) => !el.completed).length
+
+  useEffect(() => {
+    setMaxId((id) => id + 1)
+  }, [tasks])
+
+  const toggleHideDefault = (arr, defaultArr = []) => {
+    arr.forEach((el) => {
+      const newItem = { ...el, hide: false }
+      defaultArr.push(newItem)
+    })
+
+    return defaultArr
   }
 
-  createTask(title, timeLeft) {
+  const toggleProperty = (arr, id, propertyName, label = null) => {
+    const index = arr.findIndex((el) => el.id === id)
+    const oldItem = arr[index]
+
+    if (label === null) label = oldItem.label
+    const newItem = { ...oldItem, [propertyName]: !oldItem[propertyName], label }
+
+    return [...arr.slice(0, index), newItem, ...arr.slice(index + 1)]
+  }
+
+  const toggleHideOnActive = (arr, propName) => {
+    const defaultArr = []
+    const newArr = []
+
+    toggleHideDefault(arr, defaultArr)
+
+    defaultArr.forEach((el) => {
+      let newItem = {}
+      if (!el.completed) {
+        newItem = { ...el, [propName]: true }
+        newArr.push(newItem)
+      } else {
+        newItem = el
+        newArr.push(el)
+      }
+    })
+
+    return newArr
+  }
+
+  const toggleHideOnCompleted = (arr, propName) => {
+    const defaultArr = []
+    const newArr = []
+
+    toggleHideDefault(arr, defaultArr)
+
+    defaultArr.forEach((el) => {
+      let newItem = {}
+      if (el.completed) {
+        newItem = { ...el, [propName]: true }
+        newArr.push(newItem)
+      } else {
+        newItem = el
+        newArr.push(el)
+      }
+    })
+
+    return newArr
+  }
+
+  function createTask(title, timerMin, timerSec) {
     return {
-      id: this.maxId++,
       title,
-      completed: false,
+      timerMin,
+      timerSec,
       created: new Date(),
-      timeLeft,
-      isActive: false,
+      completed: false,
+      hide: false,
+      id: maxId,
     }
   }
 
-  deleteTask = (id) => {
-    this.setState(({ tasks }) => {
-      const idx = tasks.findIndex((el) => el.id === id)
-      const newArray = [...tasks.slice(0, idx), ...tasks.slice(idx + 1)]
-      return {
-        tasks: newArray,
-      }
+  const updateTaskDate = () => {
+    setTasks((data) => {
+      const newArr = []
+      data.forEach((el) => newArr.push(el))
+      return newArr
     })
   }
 
-  addTask = (text, min, sec) => {
-    const timeLeft = min * 60 + Number(sec)
-    const newTask = this.createTask(text, timeLeft)
-
-    this.setState(({ tasks }) => {
-      const newTasks = [...tasks, newTask]
-      return {
-        tasks: newTasks,
-      }
+  const deleteTask = (id) => {
+    setTasks((data) => {
+      const index = data.findIndex((el) => el.id === id)
+      const newArr = [...data.slice(0, index), ...data.slice(index + 1)]
+      return newArr
     })
   }
 
-  toggleProperty(arr, id, propName) {
-    const idx = arr.findIndex((el) => el.id === id)
+  const addTask = (text, timerMin, timerSec) => {
+    const newItem = createTask(text, timerMin, timerSec)
 
-    const oldItem = arr[idx]
-    const newItem = { ...oldItem, [propName]: !oldItem[propName] }
-
-    return [...arr.slice(0, idx), newItem, ...arr.slice(idx + 1)]
-  }
-
-  onToggleCompleted = (id) => {
-    this.setState(({ tasks }) => {
-      return {
-        tasks: this.toggleProperty(tasks, id, 'completed'),
-      }
+    setTasks((data) => {
+      const newArr = [...data, newItem]
+      return newArr
     })
   }
 
-  onClearCompleted = () => {
-    this.setState(({ tasks }) => {
-      const newArr = [...tasks.filter((task) => !task.completed)]
-
-      return {
-        tasks: newArr,
-      }
+  const onToggleCompleted = (id) => {
+    setTasks((data) => {
+      return toggleProperty(data, id, 'completed')
     })
   }
 
-  filter = (items, filter) => {
-    if (filter === 'all') {
-      return items
-    }
-    if (filter === 'active') {
-      return items.filter((item) => !item.completed)
-    }
-    if (filter === 'completed') {
-      return items.filter((item) => item.completed)
-    }
+  const onClearCompleted = () => {
+    const newArr = []
+    tasks.forEach((el) => (el.completed ? newArr.push(el.id) : el))
+    newArr.forEach((el) => deleteTask(el))
   }
 
-  onFilterChange = (filter) => {
-    this.setState({ filter })
-  }
-
-  timer = {}
-
-  onTimerStart = (id) => {
-    const { tasks } = this.state
-    const idx = tasks.findIndex((el) => el.id === id)
-    if (tasks[idx].isActive) {
-      return
-    }
-    this.timer[id] = setInterval(() => this.tick(id), 1000)
-  }
-
-  onTimerStop = (id) => {
-    clearInterval(this.timer[id])
-    this.setState(({ tasks }) => {
-      const idx = tasks.findIndex((el) => el.id === id)
-      const oldItem = tasks[idx]
-      const newItem = { ...oldItem, isActive: false }
-      const newArr = [...tasks.slice(0, idx), newItem, ...tasks.slice(idx + 1)]
-      return {
-        tasks: newArr,
-      }
+  const onSelectedAllFilter = () => {
+    setTasks((data) => {
+      return toggleHideDefault(data)
     })
   }
 
-  tick(id) {
-    this.setState(({ tasks }) => {
-      const idx = tasks.findIndex((el) => el.id === id)
-      const oldItem = tasks[idx]
-      if (oldItem === undefined) {
-        clearInterval(this.timer[id])
-        return
-      }
-      if (!oldItem.timeLeft) {
-        clearInterval(this.timer[id])
-        return
-      }
-      const newItem = { ...oldItem, timeLeft: oldItem.timeLeft - 1, isActive: true }
-      const newArr = [...tasks.slice(0, idx), newItem, ...tasks.slice(idx + 1)]
-
-      return {
-        tasks: newArr,
-      }
+  const onSelectedActiveFilter = () => {
+    setTasks((data) => {
+      return toggleHideOnCompleted(data, 'hide')
     })
   }
 
-  render() {
-    const { tasks, filter } = this.state
-    const count = tasks.filter((el) => !el.completed).length
-    const visibleItems = this.filter(tasks, filter)
+  const onSelectedCompletedFilter = () => {
+    setTasks((data) => {
+      return toggleHideOnActive(data, 'hide')
+    })
+  }
 
-    return (
-      <section className="todoapp">
-        <header className="header">
-          <h1>Todos</h1>
-          <NewTaskForm addTask={this.addTask} />
-        </header>
-        <section className="main">
-          <TaskList
-            tasks={visibleItems}
-            onDeleted={this.deleteTask}
-            onToggleCompleted={this.onToggleCompleted}
-            onTimerStart={this.onTimerStart}
-            onTimerStop={this.onTimerStop}
-          />
-        </section>
-        <Footer
-          count={count}
-          onClearCompleted={this.onClearCompleted}
-          filter={filter}
-          onFilterChange={this.onFilterChange}
+  return (
+    <section className="todoapp">
+      <header className="header">
+        <h1>Todos</h1>
+        <NewTaskForm onAddedTask={addTask} />
+      </header>
+      <section className="main">
+        <TaskList
+          todos={tasks}
+          onToggleCompleted={onToggleCompleted}
+          updateTaskDate={updateTaskDate}
+          onDeleted={deleteTask}
         />
       </section>
-    )
-  }
+      <Footer
+        itemsLeft={itemsLeft}
+        onSelectedAllFilter={onSelectedAllFilter}
+        onSelectedActiveFilter={onSelectedActiveFilter}
+        onSelectedCompletedFilter={onSelectedCompletedFilter}
+        onClearCompleted={onClearCompleted}
+      />
+    </section>
+  )
 }
+
+export default App
